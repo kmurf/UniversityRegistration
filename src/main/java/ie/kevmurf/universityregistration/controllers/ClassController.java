@@ -38,14 +38,14 @@ public class ClassController implements ClassesApi {
     public ResponseEntity<ClassApiSpec> createClass(@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
         UniversityClass saved = universityClassService.create(body);
-        return new ResponseEntity<ClassApiSpec>(saved.asOasModel(), HttpStatus.OK);
+        return new ResponseEntity<ClassApiSpec>(saved.asOasModel(), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> deleteClass(@Min(1)@ApiParam(value = "The ID of the class to delete.",required=true, allowableValues="") @PathVariable("classId") Integer classId
     ) {
         universityClassRepository.deleteById(classId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
@@ -69,9 +69,8 @@ public class ClassController implements ClassesApi {
     public ResponseEntity<Void> updateClass(@Min(1)@ApiParam(value = "The ID of the class to update.",required=true, allowableValues="") @PathVariable("classId") Integer classId
             ,@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
-        System.out.println("ClassController.updateClass()");
         if(universityClassService.update(classId, body)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

@@ -38,14 +38,14 @@ public class StudentController implements StudentsApi {
     public ResponseEntity<StudentApiSpec> createStudent(@ApiParam(value = ""  )  @Valid @RequestBody StudentApiSpec body
     ) {
         Student student = studentService.create(body);
-        return new ResponseEntity<StudentApiSpec>(student.asOasModel(), HttpStatus.OK);
+        return new ResponseEntity<StudentApiSpec>(student.asOasModel(), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> deleteStudent(@Min(1)@ApiParam(value = "The ID of the student to delete.",required=true, allowableValues="") @PathVariable("studentId") Integer studentId
     ) {
         universityStudentRepository.deleteById(studentId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class StudentController implements StudentsApi {
             ,@ApiParam(value = ""  )  @Valid @RequestBody StudentApiSpec body
     ) {
         if(studentService.update(studentId, body)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

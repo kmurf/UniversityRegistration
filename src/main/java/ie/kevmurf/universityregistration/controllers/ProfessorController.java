@@ -38,14 +38,14 @@ public class ProfessorController implements ProfessorsApi {
     public ResponseEntity<ProfessorApiSpec> createProfessor(@ApiParam(value = ""  )  @Valid @RequestBody ProfessorApiSpec body
     ) {
         Professor saved = professorService.create(body);
-        return new ResponseEntity<ProfessorApiSpec>(saved.asOasModel(), HttpStatus.OK);
+        return new ResponseEntity<ProfessorApiSpec>(saved.asOasModel(), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> deleteProfessor(@Min(1)@ApiParam(value = "The ID of the professor to delete.",required=true, allowableValues="") @PathVariable("professorId") Integer professorId
     ) {
         universityProfessorRepository.deleteById(professorId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
@@ -69,9 +69,8 @@ public class ProfessorController implements ProfessorsApi {
     public ResponseEntity<Void> updateProfessor(@Min(1)@ApiParam(value = "The ID of the professor to update.",required=true, allowableValues="") @PathVariable("professorId") Integer professorId
             ,@ApiParam(value = ""  )  @Valid @RequestBody ProfessorApiSpec body
     ) {
-        System.out.println("ProfessorController.updateProfessor()");
         if(professorService.update(professorId, body)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
