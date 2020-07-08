@@ -4,6 +4,7 @@ import ie.kevmurf.oas.api.StudentsApi;
 import ie.kevmurf.oas.model.StudentApiSpec;
 import ie.kevmurf.universityregistration.data.model.Student;
 import ie.kevmurf.universityregistration.data.repositories.StudentRepository;
+import ie.kevmurf.universityregistration.services.StudentService;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +31,14 @@ public class StudentController implements StudentsApi {
     @Autowired
     private StudentRepository universityStudentRepository;
 
+    @Autowired
+    private StudentService studentService;
+
     @Override
     public ResponseEntity<StudentApiSpec> createStudent(@ApiParam(value = ""  )  @Valid @RequestBody StudentApiSpec body
     ) {
-        Student saved = universityStudentRepository.save(new Student(body));
-        return new ResponseEntity<StudentApiSpec>(saved.asOasModel(), HttpStatus.OK);
+        Student student = studentService.create(body);
+        return new ResponseEntity<StudentApiSpec>(student.asOasModel(), HttpStatus.OK);
     }
 
     @Override
@@ -65,11 +69,7 @@ public class StudentController implements StudentsApi {
     public ResponseEntity<Void> updateStudent(@Min(1)@ApiParam(value = "The ID of the student to update.",required=true, allowableValues="") @PathVariable("studentId") Integer studentId
             ,@ApiParam(value = ""  )  @Valid @RequestBody StudentApiSpec body
     ) {
-        Optional<Student> userOpt = universityStudentRepository.findById(studentId);
-        if(userOpt.isPresent()) {
-            Student universityStudent = userOpt.get();
-            universityStudent.update(body);
-            universityStudentRepository.save(universityStudent);
+        if(studentService.update(studentId, body)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

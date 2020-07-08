@@ -4,6 +4,7 @@ import ie.kevmurf.oas.api.ProfessorsApi;
 import ie.kevmurf.oas.model.ProfessorApiSpec;
 import ie.kevmurf.universityregistration.data.model.Professor;
 import ie.kevmurf.universityregistration.data.repositories.ProfessorRepository;
+import ie.kevmurf.universityregistration.services.ProfessorService;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,13 @@ public class ProfessorController implements ProfessorsApi {
     @Autowired
     private ProfessorRepository universityProfessorRepository;
 
+    @Autowired
+    private ProfessorService professorService;
+
     @Override
     public ResponseEntity<ProfessorApiSpec> createProfessor(@ApiParam(value = ""  )  @Valid @RequestBody ProfessorApiSpec body
     ) {
-        Professor saved = universityProfessorRepository.save(new Professor(body));
+        Professor saved = professorService.create(body);
         return new ResponseEntity<ProfessorApiSpec>(saved.asOasModel(), HttpStatus.OK);
     }
 
@@ -65,11 +69,8 @@ public class ProfessorController implements ProfessorsApi {
     public ResponseEntity<Void> updateProfessor(@Min(1)@ApiParam(value = "The ID of the professor to update.",required=true, allowableValues="") @PathVariable("professorId") Integer professorId
             ,@ApiParam(value = ""  )  @Valid @RequestBody ProfessorApiSpec body
     ) {
-        Optional<Professor> userOpt = universityProfessorRepository.findById(professorId);
-        if(userOpt.isPresent()) {
-            Professor universityProfessor = userOpt.get();
-            universityProfessor.update(body);
-            universityProfessorRepository.save(universityProfessor);
+        System.out.println("ProfessorController.updateProfessor()");
+        if(professorService.update(professorId, body)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

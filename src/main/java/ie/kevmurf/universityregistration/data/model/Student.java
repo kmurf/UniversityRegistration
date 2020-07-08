@@ -3,10 +3,9 @@ package ie.kevmurf.universityregistration.data.model;
 import ie.kevmurf.oas.model.ClassApiSpec;
 import ie.kevmurf.oas.model.StudentApiSpec;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Student {
@@ -16,6 +15,14 @@ public class Student {
     private Integer id;
 
     private String name;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "Student_Classes",
+            joinColumns = {@JoinColumn(name = "student_id")},
+            inverseJoinColumns = {@JoinColumn(name = "class_id")}
+    )
+    private List<UniversityClass> universityClassList;
 
     public Student(){}
 
@@ -40,10 +47,24 @@ public class Student {
         this.name = name;
     }
 
+    public List<UniversityClass> getUniversityClassList() {
+        return universityClassList;
+    }
+
+    public void setUniversityClassList(List<UniversityClass> universityClassList) {
+        this.universityClassList = universityClassList;
+    }
+
     public StudentApiSpec asOasModel(){
         StudentApiSpec oasStudent = new StudentApiSpec();
         oasStudent.setId(id);
         oasStudent.setName(name);
+
+        ArrayList<Integer> classIds = new ArrayList<>();
+        if(universityClassList!=null) {
+            universityClassList.forEach(universityClass -> classIds.add(universityClass.getId()));
+        }
+        oasStudent.setClassIds(classIds);
         return oasStudent;
     }
 

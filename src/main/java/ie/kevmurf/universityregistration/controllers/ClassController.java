@@ -4,6 +4,7 @@ import ie.kevmurf.oas.api.ClassesApi;
 import ie.kevmurf.oas.model.ClassApiSpec;
 import ie.kevmurf.universityregistration.data.model.UniversityClass;
 import ie.kevmurf.universityregistration.data.repositories.UniversityClassRepository;
+import ie.kevmurf.universityregistration.services.UniversityClassService;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,13 @@ public class ClassController implements ClassesApi {
     @Autowired
     private UniversityClassRepository universityClassRepository;
 
+    @Autowired
+    private UniversityClassService universityClassService;
+
     @Override
     public ResponseEntity<ClassApiSpec> createClass(@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
-        UniversityClass saved = universityClassRepository.save(new UniversityClass(body));
+        UniversityClass saved = universityClassService.create(body);
         return new ResponseEntity<ClassApiSpec>(saved.asOasModel(), HttpStatus.OK);
     }
 
@@ -65,11 +69,8 @@ public class ClassController implements ClassesApi {
     public ResponseEntity<Void> updateClass(@Min(1)@ApiParam(value = "The ID of the class to update.",required=true, allowableValues="") @PathVariable("classId") Integer classId
             ,@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
-        Optional<UniversityClass> userOpt = universityClassRepository.findById(classId);
-        if(userOpt.isPresent()) {
-            UniversityClass universityClass = userOpt.get();
-            universityClass.update(body);
-            universityClassRepository.save(universityClass);
+        System.out.println("ClassController.updateClass()");
+        if(universityClassService.update(classId, body)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

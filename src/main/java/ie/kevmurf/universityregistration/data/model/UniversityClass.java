@@ -2,10 +2,9 @@ package ie.kevmurf.universityregistration.data.model;
 
 import ie.kevmurf.oas.model.ClassApiSpec;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class UniversityClass {
@@ -16,12 +15,12 @@ public class UniversityClass {
 
     private String name;
 
-    public UniversityClass(){}
+    @ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name= "PROFESSOR_ID")
+    private Professor professor;
 
-    public UniversityClass(ClassApiSpec oasClass){
-        setId(oasClass.getId());
-        setName(oasClass.getName());
-    }
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "universityClassList")
+    private List<Student> studentList;
 
     public Integer getId() {
         return id;
@@ -39,14 +38,35 @@ public class UniversityClass {
         this.name = name;
     }
 
+    public Professor getProfessor() {
+        return professor;
+    }
+
+    public void setProfessor(Professor professor) {
+        this.professor = professor;
+    }
+
+    public List<Student> getStudentList() {
+        return studentList;
+    }
+
+    public void setStudentList(List<Student> studentList) {
+        this.studentList = studentList;
+    }
+
     public ClassApiSpec asOasModel(){
         ClassApiSpec oasClass = new ClassApiSpec();
         oasClass.setId(id);
         oasClass.setName(name);
-        return oasClass;
-    }
+        if(professor!=null) {
+            oasClass.setProfessorId(professor.getId());
+        }
 
-    public void update(ClassApiSpec oasClass){
-        setName(oasClass.getName());
+        ArrayList<Integer> studentIds = new ArrayList<>();
+        if(studentList!=null) {
+            studentList.forEach(student -> studentIds.add(student.getId()));
+        }
+        oasClass.setStudentIds(studentIds);
+        return oasClass;
     }
 }
