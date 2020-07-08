@@ -2,9 +2,12 @@ package ie.kevmurf.universityregistration.controllers;
 
 import ie.kevmurf.oas.api.ClassesApi;
 import ie.kevmurf.oas.model.ClassApiSpec;
+import ie.kevmurf.universityregistration.data.model.UniversityClass;
+import ie.kevmurf.universityregistration.data.repositories.UniversityClassRepository;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,6 +19,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/api")
@@ -23,28 +27,37 @@ public class ClassController implements ClassesApi {
 
     private static final Logger log = LoggerFactory.getLogger(ClassController.class);
 
+    @Autowired
+    private UniversityClassRepository universityClassRepository;
+
     @Override
     public ResponseEntity<ClassApiSpec> createClass(@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
-        return new ResponseEntity<ClassApiSpec>(createSample(), HttpStatus.OK);
+        UniversityClass saved = universityClassRepository.save(new UniversityClass(body));
+        return new ResponseEntity<ClassApiSpec>(saved.asOasModel(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> deleteClass(@Min(1)@ApiParam(value = "The ID of the class to delete.",required=true, allowableValues="") @PathVariable("classId") Integer classId
     ) {
+        universityClassRepository.deleteById(classId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ClassApiSpec> getClassById(@Min(1)@ApiParam(value = "The ID of the class to retrieve.",required=true, allowableValues="") @PathVariable("classId") Integer classId
     ) {
-        return new ResponseEntity<ClassApiSpec>(createSample(), HttpStatus.OK);
+        Optional<UniversityClass> optional = universityClassRepository.findById(classId);
+        if(optional.isPresent()){
+            return new ResponseEntity<ClassApiSpec>(optional.get().asOasModel(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Override
     public ResponseEntity<List<ClassApiSpec>> getClasses() {
         ArrayList<ClassApiSpec> list = new ArrayList<>();
-        list.add(createSample());
+        universityClassRepository.findAll().forEach(universityClass -> list.add(universityClass.asOasModel()));
         return new ResponseEntity<List<ClassApiSpec>>(list, HttpStatus.OK);
     }
 
@@ -52,13 +65,13 @@ public class ClassController implements ClassesApi {
     public ResponseEntity<Void> updateClass(@Min(1)@ApiParam(value = "The ID of the class to update.",required=true, allowableValues="") @PathVariable("classId") Integer classId
             ,@ApiParam(value = ""  )  @Valid @RequestBody ClassApiSpec body
     ) {
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    private ClassApiSpec createSample(){
-        ClassApiSpec sample = new ClassApiSpec();
-        sample.setId(1);
-        sample.setName("History");
-        return sample;
+        Optional<UniversityClass> userOpt = universityClassRepository.findById(classId);
+        if(userOpt.isPresent()) {
+            UniversityClass universityClass = userOpt.get();
+            universityClass.update(body);
+            universityClassRepository.save(universityClass);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
