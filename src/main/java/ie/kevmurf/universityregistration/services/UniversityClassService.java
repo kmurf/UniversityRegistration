@@ -1,13 +1,14 @@
 package ie.kevmurf.universityregistration.services;
 
 import ie.kevmurf.oas.model.ClassApiSpec;
-import ie.kevmurf.oas.model.ProfessorApiSpec;
 import ie.kevmurf.universityregistration.data.model.Professor;
 import ie.kevmurf.universityregistration.data.model.Student;
 import ie.kevmurf.universityregistration.data.model.UniversityClass;
 import ie.kevmurf.universityregistration.data.repositories.ProfessorRepository;
 import ie.kevmurf.universityregistration.data.repositories.StudentRepository;
 import ie.kevmurf.universityregistration.data.repositories.UniversityClassRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,8 @@ import java.util.Optional;
 
 @Service
 public class UniversityClassService {
+
+    private static final Logger log = LoggerFactory.getLogger(UniversityClassService.class);
 
     @Autowired
     private ProfessorRepository professorRepository;
@@ -65,11 +68,18 @@ public class UniversityClassService {
         }
         List<Integer> studentIds = inputUniClass.getStudentIds();
         if(studentIds!=null){
+        	uniClassToLoad.getStudentList().forEach(student -> {
+        		student.getUniversityClassList().remove(uniClassToLoad);
+        		studentRepository.save(student);
+        	});
             ArrayList<Student> students = new ArrayList<>(studentIds.size());
             studentIds.forEach(studentId -> {
                 Optional<Student> optStudent = studentRepository.findById(studentId);
                 if(optStudent.isPresent()){
-                    students.add(optStudent.get());
+                	Student student = optStudent.get();
+                	student.getUniversityClassList().add(uniClassToLoad);
+                	studentRepository.save(student);
+                    students.add(student);
                 }
             });
             uniClassToLoad.setStudentList(students);

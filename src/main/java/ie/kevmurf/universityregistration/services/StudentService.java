@@ -1,13 +1,12 @@
 package ie.kevmurf.universityregistration.services;
 
-import ie.kevmurf.oas.model.ClassApiSpec;
 import ie.kevmurf.oas.model.StudentApiSpec;
-import ie.kevmurf.universityregistration.data.model.Professor;
 import ie.kevmurf.universityregistration.data.model.Student;
 import ie.kevmurf.universityregistration.data.model.UniversityClass;
-import ie.kevmurf.universityregistration.data.repositories.ProfessorRepository;
 import ie.kevmurf.universityregistration.data.repositories.StudentRepository;
 import ie.kevmurf.universityregistration.data.repositories.UniversityClassRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,6 +18,8 @@ import java.util.Optional;
 
 @Service
 public class StudentService {
+
+    private static final Logger log = LoggerFactory.getLogger(StudentService.class);
 
     @Autowired
     private UniversityClassRepository universityClassRepository;
